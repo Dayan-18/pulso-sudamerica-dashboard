@@ -1,48 +1,46 @@
 <!--
-Título en Dev.to: Construí un dashboard interactivo de Sudamérica con Streamlit y datos del Banco Mundial
-Descripción: Del dato público al despliegue automático: filtros, mapas y pruebas para comparar indicadores de desarrollo en Sudamérica.
+DEV Community title: Building an Interactive South America Dashboard with Streamlit and World Bank Data
+Description: From public data to automated deployment: filters, maps, tests, and a live dashboard for exploring development indicators across South America.
 Tags: python, streamlit, datavisualization, devops
-Antes de publicar: subir una captura como portada y reemplazar cualquier enlace si el subdominio final cambia.
+Before publishing: upload a dashboard screenshot as the cover image. Paste the article from the H1 heading downward into the Dev.to editor.
 -->
 
-# Construí un dashboard interactivo de Sudamérica con Streamlit y datos del Banco Mundial
+# Building an Interactive South America Dashboard with Streamlit and World Bank Data
 
-Los datos abiertos tienen un gran potencial, pero una tabla con miles de filas no siempre permite encontrar una historia. Para esta actividad construí **Pulso de Sudamérica**, un dashboard interactivo que permite comparar indicadores económicos y sociales de doce países de la región entre los años 2000 y 2025.
+Open data has enormous potential, but a table containing thousands of rows does not always tell a clear story. For this project, I built **South America Pulse**, an interactive dashboard for comparing economic and social indicators across twelve South American countries from 2000 to 2025.
 
-La aplicación fue desarrollada con Python, Streamlit, Pandas y Plotly. El código está en un repositorio público, las pruebas se ejecutan automáticamente con GitHub Actions y la publicación se realiza en Streamlit Community Cloud.
+The application was created with Python, Streamlit, Pandas, and Plotly. Its source code is stored in a public repository, every change is validated automatically with GitHub Actions, and the live application is hosted on Streamlit Community Cloud.
 
-- **Aplicación:** [Pulso de Sudamérica](https://pulso-sudamerica.streamlit.app/)
-- **Código fuente:** [Repositorio público en GitHub](https://github.com/Dayan-18/pulso-sudamerica-dashboard)
+- **Live application:** [South America Pulse](https://pulso-sudamerica.streamlit.app/)
+- **Source code:** [Public GitHub repository](https://github.com/Dayan-18/pulso-sudamerica-dashboard)
 
-> Si el enlace de la aplicación todavía muestra un error 404, significa que falta realizar el primer despliegue desde Streamlit Community Cloud. Los siguientes cambios en `main` se publicarán automáticamente.
+## The problem I wanted to solve
 
-## ¿Qué problema quería resolver?
+My goal was to build a simple tool that could answer questions such as:
 
-Mi objetivo fue crear una herramienta sencilla para responder preguntas como estas:
+- Which country has the highest GDP per capita in a selected year?
+- How has Internet adoption in Peru evolved compared with neighboring countries?
+- Is there a visible relationship between income, connectivity, and life expectancy?
+- How recent is the information available for each indicator?
 
-- ¿Qué país tiene el mayor PIB per cápita en un año determinado?
-- ¿Cómo evolucionó el acceso a Internet en Perú frente a otros países?
-- ¿Existe una relación visible entre ingreso, conectividad y esperanza de vida?
-- ¿Qué tan reciente es la información disponible para cada indicador?
+Instead of producing a collection of static charts, the dashboard lets users select an indicator, up to eight countries, and a time range. The same application can therefore support many different comparisons without requiring any code changes.
 
-En lugar de presentar gráficos estáticos, el dashboard permite seleccionar el indicador, hasta ocho países y un periodo. Así, una misma aplicación sirve para explorar diferentes preguntas sin modificar el código.
+## Data source and preparation
 
-## Fuente y preparación de los datos
+I used the **World Development Indicators** dataset from the World Bank. Its V2 API does not require an API key and supports requests by country, indicator, and period.
 
-Utilicé **World Development Indicators**, la colección de indicadores de desarrollo del Banco Mundial. Su API V2 no necesita una clave y permite solicitar datos por país, indicador y periodo.
+I selected four indicators:
 
-Los cuatro indicadores seleccionados fueron:
-
-| Indicador | Código del Banco Mundial | Unidad |
+| Indicator | World Bank code | Unit |
 |---|---|---|
-| PIB per cápita | `NY.GDP.PCAP.CD` | US$ corrientes |
-| Esperanza de vida | `SP.DYN.LE00.IN` | Años |
-| Uso de Internet | `IT.NET.USER.ZS` | % de la población |
-| Población total | `SP.POP.TOTL` | Personas |
+| GDP per capita | `NY.GDP.PCAP.CD` | Current US dollars |
+| Life expectancy at birth | `SP.DYN.LE00.IN` | Years |
+| Individuals using the Internet | `IT.NET.USER.ZS` | Percentage of population |
+| Total population | `SP.POP.TOTL` | People |
 
-El script `scripts/fetch_data.py` consulta la API, descarta observaciones sin valor, normaliza los nombres de países y guarda una extracción en CSV. Mantener una copia versionada permite que la aplicación funcione aunque la API esté temporalmente lenta o no disponible.
+The `scripts/fetch_data.py` script calls the API, removes observations without values, standardizes country names, and saves the result as a CSV file. Keeping a versioned local extract allows the application to continue working even if the API is temporarily slow or unavailable.
 
-Una llamada tiene esta estructura:
+A request follows this structure:
 
 ```python
 response = requests.get(
@@ -53,18 +51,18 @@ response = requests.get(
 response.raise_for_status()
 ```
 
-Además, la carga local valida el esquema, convierte años y valores a tipos numéricos y elimina duplicados usando país, año e indicador como clave.
+The local loading layer also validates the required columns, converts years and values to numeric types, and removes duplicates using country, year, and indicator as a composite key. The resulting dataset contains 1,218 observations and is small enough to load quickly on a free hosting service.
 
-## Diseño del dashboard
+## Dashboard design
 
-Organicé la interfaz en cuatro secciones:
+I organized the interface into four sections:
 
-1. **Panorama:** muestra indicadores principales, mapa coroplético y ranking de países.
-2. **Evolución:** compara series de tiempo con líneas interactivas.
-3. **Relación de desarrollo:** combina PIB per cápita, esperanza de vida, población y acceso a Internet en un gráfico de burbujas.
-4. **Datos:** permite revisar y descargar la selección actual como CSV.
+1. **Overview:** headline metrics, a choropleth map, and a country ranking.
+2. **Trend:** interactive time series for the selected countries.
+3. **Development relationship:** a bubble chart that combines four indicators.
+4. **Data:** a searchable table and a button for downloading the current selection as CSV.
 
-Los filtros están en la barra lateral. Con Pandas, el subconjunto principal se obtiene de manera directa:
+The filters are placed in the sidebar. With Pandas, the main subset can be created directly:
 
 ```python
 filtered = metric_data.loc[
@@ -73,7 +71,7 @@ filtered = metric_data.loc[
 ].copy()
 ```
 
-Un detalle importante fue no comparar países usando años diferentes. La función `latest_common_year` busca el año más reciente que tenga información para todos los países seleccionados. Ese año alimenta la mediana regional, el país líder, el mapa y el ranking.
+One important design decision was to avoid comparing countries using different years. The `latest_common_year` function searches for the newest year that contains data for every selected country. That year is then used for the regional median, leading country, map, and ranking.
 
 ```python
 counts = frame.groupby("year")["country_code"].nunique()
@@ -81,83 +79,89 @@ complete = counts[counts >= expected_countries]
 latest_year = int(complete.index.max())
 ```
 
-Con esta decisión, los indicadores superiores son comparables y no mezclan una observación reciente de un país con una antigua de otro.
+This makes the headline values comparable instead of mixing a recent observation from one country with an older observation from another.
 
-## Visualizaciones con Plotly
+## Interactive visualizations with Plotly
 
-Elegí Plotly porque agrega interacción sin escribir JavaScript: tooltips, zoom, leyendas y mapas funcionan directamente dentro de Streamlit.
+I chose Plotly because it provides useful interaction without requiring custom JavaScript. Tooltips, legends, zoom controls, and geographic maps work directly inside Streamlit.
 
-El mapa usa códigos ISO-3 para ubicar cada país. El gráfico de relación utiliza:
+The map uses ISO-3 country codes to locate each observation. The development relationship chart uses four visual properties at the same time:
 
-- Eje horizontal: PIB per cápita.
-- Eje vertical: esperanza de vida.
-- Tamaño de la burbuja: población.
-- Color: porcentaje de personas que usan Internet.
+- Horizontal axis: GDP per capita.
+- Vertical axis: life expectancy.
+- Bubble size: total population.
+- Bubble color: percentage of people using the Internet.
 
-Esta vista permite observar cuatro variables al mismo tiempo. En la extracción actual, los datos más recientes de Perú muestran aproximadamente **81.96 % de uso de Internet en 2024**, **77.94 años de esperanza de vida en 2024** y una población cercana a **34.58 millones en 2025**. Las cifras pueden cambiar cuando el Banco Mundial publique revisiones.
+This view makes it possible to compare income, health, connectivity, and population in a single chart. In the current extract, Peru has approximately **81.96% Internet usage in 2024**, **77.94 years of life expectancy in 2024**, and a population of about **34.58 million in 2025**. These values may change when the World Bank publishes revisions.
 
-## Calidad del código
+## Code organization and quality
 
-Separé la aplicación en componentes pequeños:
+I separated the project into small components with clear responsibilities:
 
 ```text
-streamlit_app.py       interfaz principal
-src/data.py            carga y validación
-src/analytics.py       métricas comparables
-src/charts.py          gráficos Plotly
-scripts/fetch_data.py  actualización de datos
-tests/                 pruebas automáticas
+streamlit_app.py       main user interface
+src/data.py            loading and validation
+src/analytics.py       comparable metrics
+src/charts.py          Plotly visualizations
+scripts/fetch_data.py  data refresh process
+tests/                 automated tests
 ```
 
-Las pruebas verifican que:
+The automated tests verify that:
 
-- Existan los cuatro indicadores.
-- La clave país-año-indicador sea única.
-- No queden valores nulos en la medición.
-- El cálculo del último año comparable sea correcto.
-- La mediana, el crecimiento y el país líder se calculen correctamente.
+- All four indicators are present.
+- The country-year-indicator key is unique.
+- No null measurement values remain.
+- The latest comparable year is calculated correctly.
+- The median, percentage change, and leading country are correct.
 
-## Automatización con GitHub Actions
+The project currently passes all four tests locally.
 
-El repositorio incluye el flujo `.github/workflows/ci.yml`. En cada `push` o `pull request`, GitHub crea un entorno limpio y ejecuta cuatro pasos:
+## Continuous integration with GitHub Actions
+
+The repository includes `.github/workflows/ci.yml`. On every push or pull request, GitHub creates a clean environment and performs four checks:
 
 ```yaml
-- name: Revisar estilo
+- name: Check code style
   run: ruff check .
 
-- name: Ejecutar pruebas
+- name: Run tests
   run: pytest -q
 
-- name: Probar inicio de Streamlit
+- name: Test the Streamlit startup
   run: |
     streamlit run streamlit_app.py --server.headless true --server.port 8501 &
     curl --retry 20 --retry-delay 2 --retry-connrefused \
       http://localhost:8501/_stcore/health
 ```
 
-De esta manera, un error de sintaxis, una dependencia rota o un fallo al iniciar la aplicación se detecta antes de publicar.
+This workflow detects syntax errors, broken dependencies, failed tests, and application startup problems before a new version is published.
 
-## Despliegue en Streamlit Community Cloud
+## Deployment on Streamlit Community Cloud
 
-El despliegue inicial requiere conectar una cuenta de GitHub en [Streamlit Community Cloud](https://share.streamlit.io/), elegir el repositorio, la rama `main` y el archivo `streamlit_app.py`.
+I deployed the application using [Streamlit Community Cloud](https://share.streamlit.io/). The initial setup only required connecting my GitHub account and selecting three values:
 
-Después de esa configuración, el proceso es automático: cada cambio enviado a la rama principal es detectado por Streamlit y la aplicación pública se actualiza. Esto complementa el flujo de GitHub Actions: primero se valida el proyecto y luego la plataforma publica la versión del repositorio.
+- Repository: `Dayan-18/pulso-sudamerica-dashboard`
+- Branch: `main`
+- Entry point: `streamlit_app.py`
 
-La aplicación no necesita secretos ni una base de datos externa porque utiliza la extracción CSV incluida en el repositorio. Esto hace que el despliegue sea pequeño, reproducible y fácil de mantener.
+After that initial configuration, deployment became automatic. When a validated change is pushed to the main branch, Streamlit detects the repository update and rebuilds the public application.
 
-## Lo que aprendí
+The dashboard does not require secrets or an external database because it reads the versioned CSV extract included in the repository. This keeps the deployment lightweight, reproducible, and suitable for a free cloud platform.
 
-El reto principal no fue dibujar gráficos, sino tomar decisiones que hicieran comparables los datos. Trabajar con indicadores públicos implica aceptar que cada serie puede tener un último año diferente y que el proveedor puede revisar cifras anteriores.
+## What I learned
 
-También comprobé que un dashboard es más útil cuando cada visualización responde una pregunta concreta. Por eso limité los indicadores, evité duplicar gráficos y agregué una descarga de datos para que el usuario pueda continuar su propio análisis.
+The main challenge was not drawing the charts; it was making responsible decisions about how the data should be compared. Public indicators do not always share the same latest year, and providers may revise previously published observations.
 
-Como siguientes mejoras me gustaría incorporar indicadores ambientales, permitir guardar una comparación mediante una URL y agregar una nota automática cuando un país tenga datos desactualizados.
+I also learned that a dashboard is more useful when every visualization answers a specific question. I limited the number of indicators, avoided repeating the same information in multiple charts, and included a CSV download so users can continue their own analysis.
 
-## Recursos
+As future improvements, I would like to add environmental indicators, allow users to save a comparison in a shareable URL, and display an automatic note whenever a country has outdated data.
 
-- [Código fuente en GitHub](https://github.com/Dayan-18/pulso-sudamerica-dashboard)
-- [Dashboard en Streamlit](https://pulso-sudamerica.streamlit.app/)
-- [Documentación de la API del Banco Mundial](https://datahelpdesk.worldbank.org/knowledgebase/articles/889392-about-the-indicators-api-documentation)
-- [Documentación de Streamlit Community Cloud](https://docs.streamlit.io/deploy/streamlit-community-cloud)
+## Resources
 
-Si te interesa la visualización de datos públicos, puedes clonar el repositorio y adaptar la lista de países o indicadores desde `scripts/fetch_data.py`.
+- [Public GitHub repository](https://github.com/Dayan-18/pulso-sudamerica-dashboard)
+- [Live Streamlit dashboard](https://pulso-sudamerica.streamlit.app/)
+- [World Bank Indicators API documentation](https://datahelpdesk.worldbank.org/knowledgebase/articles/889392-about-the-indicators-api-documentation)
+- [Streamlit Community Cloud documentation](https://docs.streamlit.io/deploy/streamlit-community-cloud)
+
+If you are interested in public data visualization, you can clone the repository and adapt the country or indicator lists in `scripts/fetch_data.py`.

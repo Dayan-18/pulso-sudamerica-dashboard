@@ -105,7 +105,7 @@ delta = (
     else f"{summary.change_pct:+.1f}% desde {summary.first_year}"
 )
 
-metric_1, metric_2, metric_3, metric_4 = st.columns(4)
+metric_1, metric_2 = st.columns(2)
 metric_1.metric(
     f"Mediana regional · {summary.year}",
     format_value(summary.median, selected_indicator),
@@ -116,6 +116,7 @@ metric_2.metric(
     summary.leader,
     format_value(summary.leader_value, selected_indicator),
 )
+metric_3, metric_4 = st.columns(2)
 metric_3.metric("Países comparados", summary.countries)
 metric_4.metric("Último año comparable", summary.year)
 
