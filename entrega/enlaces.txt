@@ -1,0 +1,15 @@
+ACTIVIDAD GRUPAL 01 - VISUALIZATION REPORTS OR DASHBOARD
+
+Estudiante: Dayan Elvis Jahuira Pilco
+
+Repositorio público:
+https://github.com/Dayan-18/pulso-sudamerica-dashboard
+
+Dashboard publicado:
+https://pulso-sudamerica.streamlit.app/
+
+Artículo en Dev.to:
+PENDIENTE
+
+Video público:
+PENDIENTE
