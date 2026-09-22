@@ -61,7 +61,7 @@ Streamlit Community Cloud queda conectado a la rama `main`; después del primer 
 
 - Repositorio público: <https://github.com/Dayan-18/pulso-sudamerica-dashboard>
 - Aplicación pública: <https://pulso-sudamerica.streamlit.app/>
-- Artículo: pendiente de publicación.
+- Artículo: <https://dev.to/dayan_elvisjahuirapilco/building-an-interactive-south-america-dashboard-with-streamlit-and-world-bank-data-1m1e>
 - Video: pendiente de publicación.
 
 ## Autor

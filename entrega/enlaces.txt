@@ -9,7 +9,7 @@ Dashboard publicado:
 https://pulso-sudamerica.streamlit.app/
 
 Artículo en Dev.to:
-PENDIENTE
+https://dev.to/dayan_elvisjahuirapilco/building-an-interactive-south-america-dashboard-with-streamlit-and-world-bank-data-1m1e
 
 Video público:
 PENDIENTE
